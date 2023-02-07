@@ -36,25 +36,26 @@ fn get_app_dir_path(app_handle: &tauri::AppHandle) -> String {
 
 #[tauri::command]
 fn open_window(profile_id: String, app_handle: tauri::AppHandle) {
+    // Create a parsed profile ID without the "profile_" prefix
+    let trimmed_profile_id = profile_id.replace("profile_", "");
+
     // Create data directory path
     let data_directory = PathBuf::from(
-        format!(r"{}\profile_{}", get_app_dir_path(&app_handle), profile_id)
+        format!(r"{}/profile_{}", get_app_dir_path(&app_handle), trimmed_profile_id)
     );
-
-    // Create a parsed profile ID without the "profile_" prefix
-    let profile_id = profile_id.replace("profile_", "");
+    println!("data_directory: {:?}", data_directory.to_string_lossy());
 
     // Create window
     let window = tauri::WindowBuilder
         ::new(
             &app_handle,
-            format!("client_{}", profile_id),
+            format!("client_{}", trimmed_profile_id),
             tauri::WindowUrl::External(FLYFF_URI.parse().unwrap())
         )
         .data_directory(data_directory)
         .center()
         .inner_size(800.0, 600.0)
-        .title(format!("Flyzer | {}", profile_id))
+        .title(format!("Flyzer | {}", trimmed_profile_id))
         .build()
         .unwrap();
 
