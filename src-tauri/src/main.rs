@@ -34,28 +34,37 @@ fn get_app_dir_path(app_handle: &tauri::AppHandle) -> String {
     app_handle.path_resolver().app_dir().unwrap().to_string_lossy().to_string()
 }
 
+fn get_profile_folder_path(app_handle: &tauri::AppHandle) -> PathBuf {
+    let path: PathBuf = [get_app_dir_path(&app_handle), "profiles".to_string()].iter().collect();
+    path
+}
+
+fn get_profile_path(app_handle: &tauri::AppHandle, profile_id: &String) -> PathBuf {
+    let path: PathBuf = [
+        get_profile_folder_path(app_handle).to_string_lossy().to_string(),
+        profile_id.to_string(),
+    ]
+        .iter()
+        .collect();
+    path
+}
+
 #[tauri::command]
 fn open_window(profile_id: String, app_handle: tauri::AppHandle) {
-    // Create a parsed profile ID without the "profile_" prefix
-    let trimmed_profile_id = profile_id.replace("profile_", "");
-
     // Create data directory path
-    let data_directory = PathBuf::from(
-        format!(r"{}/profile_{}", get_app_dir_path(&app_handle), trimmed_profile_id)
-    );
-    println!("data_directory: {:?}", data_directory.to_string_lossy());
+    let data_directory: PathBuf = get_profile_path(&app_handle, &profile_id);
 
     // Create window
     let window = tauri::WindowBuilder
         ::new(
             &app_handle,
-            format!("client_{}", trimmed_profile_id),
+            format!("client_{}", profile_id),
             tauri::WindowUrl::External(FLYFF_URI.parse().unwrap())
         )
         .data_directory(data_directory)
         .center()
         .inner_size(800.0, 600.0)
-        .title(format!("Flyzer | {}", trimmed_profile_id))
+        .title(format!("Flyzer | {}", profile_id))
         .build()
         .unwrap();
 
@@ -72,49 +81,42 @@ fn open_all_profiles(app_handle: tauri::AppHandle) {
 
 #[tauri::command]
 fn list_profiles(app_handle: tauri::AppHandle) -> Vec<String> {
-    drop(fs::create_dir(format!(r"{}/", get_app_dir_path(&app_handle)).clone()));
-    let paths = fs::read_dir(format!(r"{}/", get_app_dir_path(&app_handle))).unwrap();
+    drop(fs::create_dir(get_profile_folder_path(&app_handle).to_string_lossy().to_string()));
+    let paths = fs::read_dir(get_profile_folder_path(&app_handle)).unwrap();
     let mut profiles = vec![];
 
     for path in paths {
         if let Ok(entry) = path {
-            if entry.file_name().to_str().unwrap().starts_with("profile_") {
-                profiles.push(String::from(&*entry.file_name().to_str().unwrap()));
-            }
+            profiles.push(String::from(&*entry.file_name().to_str().unwrap()));
         }
     }
 
     profiles
 }
 
-fn get_profile_folder_path(app_handle: &tauri::AppHandle, profile_id: &String) -> String {
-    println!(r"{}/profile_{}", get_app_dir_path(&app_handle), profile_id);
-    format!(r"{}/profile_{}", get_app_dir_path(&app_handle), profile_id)
-}
-
 #[tauri::command]
 fn create_profile(profile_id: String, app_handle: tauri::AppHandle) {
     println!("Creating profile: {}", profile_id);
-    drop(fs::create_dir(get_profile_folder_path(&app_handle, &profile_id)));
+    drop(fs::create_dir(get_profile_path(&app_handle, &profile_id)));
 }
 
 #[tauri::command]
 fn delete_profile(profile_id: String, app_handle: tauri::AppHandle) {
-    drop(fs::remove_dir_all(get_profile_folder_path(&app_handle, &profile_id)));
+    drop(fs::remove_dir_all(get_profile_path(&app_handle, &profile_id)));
 }
 
 #[tauri::command]
 fn update_profile(profile_id: String, new_profile_id: String, app_handle: tauri::AppHandle) {
     drop(
         fs::rename(
-            get_profile_folder_path(&app_handle, &profile_id),
-            get_profile_folder_path(&app_handle, &new_profile_id)
+            get_profile_path(&app_handle, &profile_id),
+            get_profile_path(&app_handle, &new_profile_id)
         )
     );
     drop(
         fs::rename(
-            get_profile_folder_path(&app_handle, &profile_id),
-            get_profile_folder_path(&app_handle, &new_profile_id).clone()
+            get_profile_path(&app_handle, &profile_id),
+            get_profile_path(&app_handle, &new_profile_id).clone()
         )
     );
 }
