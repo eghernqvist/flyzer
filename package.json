@@ -13,6 +13,7 @@
     "@fontsource/public-sans": "^4.5.12",
     "@mui/icons-material": "^5.11.0",
     "@mui/joy": "^5.0.0-alpha.66",
+    "@mui/material": "^5.11.8",
     "@tauri-apps/api": "^1.1.0",
     "next": "^12.3.0",
     "react": "^18.2.0",
