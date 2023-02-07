@@ -71,8 +71,10 @@ fn open_window(profile_id: String, app_handle: tauri::AppHandle) {
     #[cfg(target_os = "macos")]
     {
         unsafe {
-            let ns_window = window.ns_window().unwrap() as cocoa::base::id;
-            NSWindow::setAllowsAutomaticWindowTabbing_(ns_window, cocoa::base::NO);
+            use cocoa::base::{ id, NO };
+            use cocoa::appkit::{NSWindow, NSWindowTitleVisibility};
+            let ns_window = window.ns_window().unwrap() as id;
+            NSWindow::setAllowsAutomaticWindowTabbing_(ns_window, NO);
         }
     }
 
