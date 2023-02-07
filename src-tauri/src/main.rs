@@ -17,6 +17,7 @@ fn main() {
                 list_profiles,
                 create_profile,
                 delete_profile,
+                open_all_profiles,
                 update_profile
             ]
         )
@@ -40,6 +41,9 @@ fn open_window(profile_id: String, app_handle: tauri::AppHandle) {
         format!(r"{}\profile_{}", get_app_dir_path(&app_handle), profile_id)
     );
 
+    // Create a parsed profile ID without the "profile_" prefix
+    let profile_id = profile_id.replace("profile_", "");
+
     // Create window
     let window = tauri::WindowBuilder
         ::new(
@@ -56,6 +60,13 @@ fn open_window(profile_id: String, app_handle: tauri::AppHandle) {
 
     // Open window
     drop(window.show());
+}
+
+#[tauri::command]
+fn open_all_profiles(app_handle: tauri::AppHandle) {
+    for profile_id in list_profiles(app_handle.clone()) {
+        open_window(profile_id, app_handle.clone());
+    }
 }
 
 #[tauri::command]

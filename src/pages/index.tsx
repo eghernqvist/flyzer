@@ -14,10 +14,15 @@ import {
   ListItem,
   ListItemButton,
   ListItemContent,
+  Menu,
+  MenuItem,
   Tooltip,
   Typography,
 } from "@mui/joy";
-import { DeleteForeverOutlined } from "@mui/icons-material";
+import {
+  ArrowDropDownOutlined,
+  DeleteForeverOutlined,
+} from "@mui/icons-material";
 import AddProfileButton from "../components/AddProfileButton";
 
 function App() {
@@ -41,6 +46,15 @@ function App() {
       await getProfiles();
     })();
   }, []);
+
+  const [anchorEl, setAnchorEl] = useState(null);
+  const open = Boolean(anchorEl);
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   return (
     <Box p={4}>
@@ -96,6 +110,21 @@ function App() {
                 >
                   Launch
                 </Button>
+
+                <IconButton onClick={handleClick} variant="plain">
+                  <ArrowDropDownOutlined />
+                </IconButton>
+                <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
+                  <MenuItem
+                    variant="soft"
+                    onClick={async () => {
+                      await invoke("open_all_profiles");
+                      handleClose();
+                    }}
+                  >
+                    Open all profiles
+                  </MenuItem>
+                </Menu>
               </Grid>
               <Grid container justifyContent="center">
                 <Card sx={{ backdropFilter: "blur(10px)" }} variant="outlined">
