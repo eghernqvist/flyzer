@@ -7,7 +7,7 @@
     "withGlobalTauri": false
   },
   "package": {
-    "productName": "flyzer",
+    "productName": "Flyzer",
     "version": "0.1.0"
   },
   "tauri": {
@@ -56,10 +56,11 @@
     "windows": [
       {
         "fullscreen": false,
-        "height": 600,
+        "height": 400,
+        "width": 600,
         "resizable": true,
-        "title": "flyzer",
-        "width": 800
+        "title": "Flyzer",
+        "label": "launcher"
       }
     ]
   }
