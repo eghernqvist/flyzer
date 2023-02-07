@@ -1,17 +1,30 @@
-#![cfg_attr(
-    all(not(debug_assertions), target_os = "windows"),
-    windows_subsystem = "windows"
-)]
-
-// Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-#[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
-}
+#![cfg_attr(all(not(debug_assertions), target_os = "windows"), windows_subsystem = "windows")]
 
 fn main() {
-    tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![greet])
-        .run(tauri::generate_context!())
+    // Generate tauri context
+    let context = tauri::generate_context!();
+
+    // Build app
+    tauri::Builder
+        ::default()
+        .invoke_handler(tauri::generate_handler![open_window])
+        .run(context)
         .expect("error while running tauri application");
+}
+
+#[tauri::command]
+async fn open_window(app_handle: tauri::AppHandle) {
+    let window = tauri::WindowBuilder
+        ::new(
+            &app_handle,
+            "client",
+            tauri::WindowUrl::External("https://universe.flyff.com/play".parse().unwrap())
+        )
+        //.resizable(false)
+        .center()
+        .inner_size(800.0, 600.0)
+        .title(format!("Flyzer | Flyff Universe"))
+        .build()
+        .unwrap();
+    drop(window.show());
 }
