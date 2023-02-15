@@ -91,7 +91,7 @@ fn open_all_profiles(app_handle: tauri::AppHandle) {
 
 #[tauri::command]
 fn list_profiles(app_handle: tauri::AppHandle) -> Vec<String> {
-    drop(fs::create_dir(get_profile_folder_path(&app_handle).to_string_lossy().to_string()));
+    drop(fs::create_dir_all(get_profile_folder_path(&app_handle).to_string_lossy().to_string()));
     let paths = fs::read_dir(get_profile_folder_path(&app_handle)).unwrap();
     let mut profiles = vec![];
 
