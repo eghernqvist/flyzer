@@ -11,6 +11,9 @@ fn main() {
     // Run application
     tauri::Builder
         ::default()
+        .plugin(tauri_plugin_single_instance::init(|app, argv, cwd| {
+            println!("{}, {argv:?}, {cwd}", app.package_info().name);
+        }))
         .invoke_handler(
             tauri::generate_handler![
                 open_window,
@@ -48,16 +51,31 @@ fn get_profile_path(app_handle: &tauri::AppHandle, profile_id: &String) -> PathB
     path
 }
 
+fn is_window_open(label: &str, app_handle: &tauri::AppHandle) -> bool {
+    let window = tauri::Manager::get_window(app_handle, label);
+    if window.is_some() {
+        drop(window.unwrap().set_focus());
+        return true;
+    }
+    return false;
+}
+
 #[tauri::command]
 async fn open_window(profile_id: String, app_handle: tauri::AppHandle) {
     // Create data directory path
     let data_directory: PathBuf = get_profile_path(&app_handle, &profile_id);
 
+    let label = format!("client_{}", &profile_id);
+
+    if is_window_open(&label, &app_handle) {
+        return
+    }
+
     // Create window
     let window = tauri::WindowBuilder
         ::new(
             &app_handle,
-            format!("client_{}", profile_id),
+            &label,
             tauri::WindowUrl::External(FLYFF_URI.parse().unwrap())
         )
         .data_directory(data_directory)
