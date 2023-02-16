@@ -11,9 +11,9 @@ fn main() {
     // Run application
     tauri::Builder
         ::default()
-        .plugin(tauri_plugin_single_instance::init(|app, argv, cwd| {
-            println!("{}, {argv:?}, {cwd}", app.package_info().name);
-        }))
+        .plugin(
+            tauri_plugin_single_instance::init(|_app, _argv, _cwd| {})
+        )
         .invoke_handler(
             tauri::generate_handler![
                 open_window,
