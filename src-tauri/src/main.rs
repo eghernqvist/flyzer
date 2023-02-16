@@ -17,7 +17,6 @@ fn main() {
                 list_profiles,
                 create_profile,
                 delete_profile,
-                open_all_profiles,
                 update_profile
             ]
         )
@@ -50,7 +49,7 @@ fn get_profile_path(app_handle: &tauri::AppHandle, profile_id: &String) -> PathB
 }
 
 #[tauri::command]
-fn open_window(profile_id: String, app_handle: tauri::AppHandle) {
+async fn open_window(profile_id: String, app_handle: tauri::AppHandle) {
     // Create data directory path
     let data_directory: PathBuf = get_profile_path(&app_handle, &profile_id);
 
@@ -80,13 +79,6 @@ fn open_window(profile_id: String, app_handle: tauri::AppHandle) {
 
     // Open window
     drop(window.show());
-}
-
-#[tauri::command]
-fn open_all_profiles(app_handle: tauri::AppHandle) {
-    for profile_id in list_profiles(app_handle.clone()) {
-        open_window(profile_id, app_handle.clone());
-    }
 }
 
 #[tauri::command]
