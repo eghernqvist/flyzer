@@ -28,14 +28,22 @@ import AddProfileButton from "../components/AddProfileButton";
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
   const [profiles, setProfiles] = useState<string[]>([]);
-  const [selectedProfile, setSelectedProfile] = useState<string>("");
+  const [selectedProfiles, setSelectedProfiles] = useState<string[]>([]);
+
+  const toggleSelectedProfile = (profile) => {
+    if (selectedProfiles.includes(profile)) {
+      setSelectedProfiles([...selectedProfiles.filter(selectedProfile => selectedProfile !== profile)])
+    } else {
+      setSelectedProfiles([...selectedProfiles, profile])
+    }
+  }
 
   const getProfiles = useCallback(
     async () =>
       invoke("list_profiles").then((value: string[]) => {
         if (value) {
           setProfiles(value.sort((a, b) => a.localeCompare(b)));
-          setSelectedProfile(value[0]);
+          setSelectedProfiles([value[0]]);
           setLoading(false);
         }
       }),
@@ -92,7 +100,7 @@ function App() {
             <Box>
               <Grid container justifyContent="center" pb={2}>
                 <Button
-                  disabled={!selectedProfile}
+                  disabled={selectedProfiles.length === 0}
                   sx={{
                     fontSize: "xl",
                     color: "black",
@@ -105,7 +113,9 @@ function App() {
                     p: 3,
                   }}
                   onClick={async () =>
-                    invoke("open_window", { profileId: selectedProfile })
+                    selectedProfiles.forEach(profile => {
+                      invoke("open_window", { profileId: profile })
+                    })
                   }
                 >
                   Launch
@@ -118,7 +128,9 @@ function App() {
                   <MenuItem
                     variant="soft"
                     onClick={async () => {
-                      await invoke("open_all_profiles");
+                      profiles.forEach(profile => {
+                        invoke("open_window", { profileId: profile })
+                      })
                       handleClose();
                     }}
                   >
@@ -161,8 +173,8 @@ function App() {
                         {profiles?.length ? (
                           profiles.map((profile) => (
                             <ListItemButton
-                              onClick={() => setSelectedProfile(profile)}
-                              selected={selectedProfile === profile}
+                              onClick={() => toggleSelectedProfile(profile)}
+                              selected={selectedProfiles.includes(profile)}
                             >
                               <ListItemContent>
                                 {profile.replace("profile_", "")}
